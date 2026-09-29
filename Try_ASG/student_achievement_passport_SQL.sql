@@ -306,16 +306,67 @@ SELECT * FROM club_membership ORDER BY (membershipID);
 
 -- Test Query
 
--- Can we join student + programme?
+-- Query 1 - JOIN
 SELECT
-    s.Name,
+    s.StudentID,
     s.EnrolmentNumber,
+    s.Name,
     p.ProgrammeName
 FROM STUDENT s
 JOIN PROGRAMME p
-    ON s.ProgrammeID = p.ProgrammeID; 
-    
--- Can we see event participation? 
+    ON s.ProgrammeID = p.ProgrammeID;
+
+-- Query 2 - JOIN + filtering
+SELECT 
+    e.eventID,
+    e.eventName,
+    e.eventDate,
+    e.eventActivities,
+    c.categoryName
+FROM event e
+JOIN event_category c ON e.categoryID = c.categoryID
+WHERE e.categoryID = 2;
+
+-- Query 3 - Multiple JOIN
+SELECT 
+    s.studentID,
+    s.name,
+    e.eventID,
+    e.eventName AS event_title,
+    r.roleName,
+    p.hours
+FROM student s
+JOIN participation p ON s.studentID = p.studentID
+JOIN event e ON p.eventID = e.eventID
+JOIN role r ON p.roleID = r.roleID
+WHERE s.studentID = 8;
+
+-- Query 4 - SUM() + GROUP BY
+SELECT
+    s.StudentID,
+    s.Name,
+    SUM(p.Hours) AS TotalHours
+FROM STUDENT s
+JOIN PARTICIPATION p
+    ON s.StudentID = p.StudentID
+GROUP BY
+    s.StudentID,
+    s.Name;
+
+-- Query 5 - SUM() + GROUP BY + HAVING
+SELECT
+    s.StudentID,
+    s.Name,
+    SUM(p.Hours) AS TotalHours
+FROM STUDENT s
+JOIN PARTICIPATION p
+    ON s.StudentID = p.StudentID
+GROUP BY
+    s.StudentID,
+    s.Name
+HAVING SUM(p.Hours) > 10;
+
+-- Query 6 - Multiple JOIN + WHERE
 SELECT
     s.Name,
     e.EventName,
@@ -327,18 +378,24 @@ JOIN STUDENT s
 JOIN EVENT e
     ON p.EventID = e.EventID
 JOIN ROLE r
-    ON p.RoleID = r.RoleID;
-    
--- Can we see event categories?
-SELECT
-    e.EventName,
-    ec.CategoryName,
-    e.EventDate
-FROM EVENT e
+    ON p.RoleID = r.RoleID
+WHERE r.RoleName = 'Organizer';
+
+-- Query 7 - DISTINCT + multiple JOIN
+SELECT DISTINCT
+    s.StudentID,
+    s.Name
+FROM STUDENT s
+JOIN PARTICIPATION p
+    ON s.StudentID = p.StudentID
+JOIN EVENT e
+    ON p.EventID = e.EventID
 JOIN EVENT_CATEGORY ec
-    ON e.CategoryID = ec.CategoryID;
-    
--- Can we see club membership? 
+    ON e.CategoryID = ec.CategoryID
+WHERE ec.CategoryName = 'Comunity Services';
+
+
+-- Query 8 - Multiple JOIN + filtering
 SELECT
     s.Name,
     c.ClubName,
@@ -349,10 +406,50 @@ FROM CLUB_MEMBERSHIP cm
 JOIN STUDENT s
     ON cm.StudentID = s.StudentID
 JOIN CLUB c
-    ON cm.ClubID = c.ClubID;
-    
--- Test the foreign key 
-INSERT INTO PARTICIPATION
-(StudentID, EventID, RoleID, Hours)
-VALUES
-(9999, 1, 1, 3.0);
+    ON cm.ClubID = c.ClubID
+WHERE s.StudentID = 1;
+
+-- Query 9 - COUNT() + GROUP BY + LEFT JOIN
+SELECT
+    e.EventID,
+    e.EventName,
+    COUNT(p.StudentID) AS NumberOfStudents
+FROM EVENT e
+LEFT JOIN PARTICIPATION p
+    ON e.EventID = p.EventID
+GROUP BY
+    e.EventID,
+    e.EventName;
+
+-- Query 10 - SUM() + GROUP BY
+SELECT
+    e.EventID,
+    e.EventName,
+    SUM(p.Hours) AS TotalHours
+FROM EVENT e
+JOIN PARTICIPATION p
+    ON e.EventID = p.EventID
+GROUP BY
+    e.EventID,
+    e.EventName;
+
+-- Query 11 - JOIN + WHERE
+SELECT
+    s.StudentID,
+    s.EnrolmentNumber,
+    s.Name,
+    s.Email
+FROM STUDENT s
+JOIN PROGRAMME p
+    ON s.ProgrammeID = p.ProgrammeID
+WHERE p.ProgrammeName = 'BEng (Hons) in Civil Engineering';
+
+-- Query 12 - BETWEEN + ORDER BY
+SELECT
+    EventID,
+    EventName,
+    EventDate,
+    EventActivities
+FROM EVENT
+WHERE EventDate BETWEEN '2026-01-01' AND '2026-06-30'
+ORDER BY EventDate;
